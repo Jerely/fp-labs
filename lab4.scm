@@ -23,11 +23,18 @@
            [`(/ ,a ,b) #:when (and (number? a) (number? b)) (/ a b)]
            [`(* ,a 0) 0]
            [`(* 0 ,a) 0]
+           [`(+ 0 ,a) a]
+           [`(+ ,a 0) a]
            [`(* ,a ,b ,c) #:when (or (szero? a) (szero? b) (szero? c)) 0]
            [`(* 1 ,a) a]
            [`(* ,a 1) a]
            [`(- ,a) #:when (number? a) (- a)]
-           [`(,o ,a ,b)  `(,o ,(simplify a) ,(simplify b))]
+           [`(,o ,a ,b) #:when (or (pair? a) (pair? b))  (let ([sa (simplify a)]
+                                                               [sb (simplify b)])
+                                                               (if (and (equal? sa a)
+                                                                        (equal? sb b))
+                                                                   `(,o ,sa ,sb)
+                                                                   (simplify `(,o ,sa ,sb))))]
            [`(,o ,a ,b ,c) `(,o ,(simplify a) ,(simplify b) ,(simplify c))]
            [_ f]
            )))
@@ -50,12 +57,10 @@
            [`(expt ,U ,c) #:when (constant? c) `(* ,c (expt ,U (- ,c 1)) ,(deriv U x))]
            [`(log ,U) `(* (expt ,U -1) ,(deriv U x))]
            [`(,U) (deriv U x)]
-           ;;[`(/ ,U ,V) `(/ (- (* ,(deriv U x) ,V) (* ,U ,(deriv V x))) (* ,V ,V))]
            )))
 
 (define-syntax-rule (test expr)
   (begin (quote expr)
-         ;; expr
          (simplify expr)))
 
 (test (deriv 'y 'x))
