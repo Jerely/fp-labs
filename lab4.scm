@@ -76,3 +76,67 @@
 (test (deriv '(expt x 3) 'x))
 (test (deriv '(log x) 'x))
 (test (deriv '(+ (* x x) (* 2 x)) 'x))
+
+
+;; Задание 3
+(define (lab arg)
+  (map
+   (lambda (l)
+     (if (not (list? l))
+         l
+         (foldl
+          (lambda (arg acc)
+            (let add ([arg arg]
+                      [acc acc])
+              (match arg
+                     [(? number?) (+ arg acc)]
+                     [(? pair?) (foldl add acc arg)]
+                     [_ acc])))
+          0
+          l)))
+   arg))
+
+(define (add arg
+             acc)
+  (match arg
+         [(? number?) (+ arg acc)]
+         [(? pair?) (foldl add acc arg)]
+         [_ acc]))
+                
+(lab '('(1 2 3 4 5) a '(1.2 3.4 5 6) 1 '(1 a 2 b 3 c) '() '(1 a 2.3 b '(4 c 5.6 d 7) e '(8.9 f 10)) 1.0 '(1 -2 3 -4)))
+
+;; Задание 4
+(define (my-eval xpr)
+  (if (pair? xpr)
+      (let ([operator (car xpr)]
+            [operands (cdr xpr)])
+        (match operator
+               ['+ (my-apply + operands)]
+               ['- (my-apply - operands)]
+               ['* (my-apply * operands)]
+               ['/ (my-apply / operands)]
+               ['car (car (my-eval (car operands)))]
+               ['cdr (cdr (my-eval (car operands)))]
+               ['cons (cons (my-eval (car operands))
+                            (my-eval (cadr operands)))]
+               ['union (union (my-eval (car operands))
+                              (my-eval (cadr operands)))]
+               [_ (cadr xpr)]))
+      xpr))
+
+(define (my-apply operation operands)
+  (let loop ([acc (my-eval (car operands))]
+             [operands (cdr operands)])
+    (if (null? operands)
+        acc
+        (loop (operation acc
+                         (my-eval (car operands)))
+              (cdr operands)))))
+
+;; Задание 5
+(define (union set1 set2)
+  (if (null? set1)
+      set2
+      (cons (car set1)
+            (union (cdr set1)
+                   set2))))
