@@ -119,8 +119,8 @@
                ['cdr (cdr (my-eval (car operands)))]
                ['cons (cons (my-eval (car operands))
                             (my-eval (cadr operands)))]
-               ['union (union (my-eval (car operands))
-                              (my-eval (cadr operands)))]
+               ['expt (expt (my-eval (car operands))
+                            (my-eval (cadr operands)))]
                [_ (cadr xpr)]))
       xpr))
 
@@ -140,3 +140,5 @@
       (cons (car set1)
             (union (cdr set1)
                    set2))))
+
+(my-eval '(expt 2 10))
